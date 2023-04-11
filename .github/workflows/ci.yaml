@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+      branches: [ main, ci ]
+  pull_request:
+      branches: [ main ]
+
+jobs:
+  openbsd:
+    runs-on: macos-12
+    steps:
+    - name: Bootstrap OpenBSD-latest
+      uses: moritzbuhl/emulate@v1
+      with:
+        operating-system: openbsd-latest
+
+    - name: Install Dependencies
+      run: |
+        pkg_add bash libsodium rust-ring wireguard-tools 
+
+    - name: Build
+      run: |
+        cd /home
+        git clone https://github.com/rosenpass/rosenpass.git
+        cd rosenpass
+        LIBCLANG_PATH=/usr/local/lib/ cargo build --release
+        LIBCLANG_PATH=/usr/local/lib/ cargo test
